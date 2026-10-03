@@ -1,0 +1,7 @@
+# Electron-ABI snapshot produced by scripts/prepare-windows-safe-apply-tests.mjs.
+# Deliberately NOT inside build/ (also gitignored via the repo's top-level
+# `build/` pattern) - `node-gyp rebuild` always runs a full clean first,
+# which rimraf's the whole build/ directory, so anything meant to survive
+# across the plain-Node <-> Electron ABI rebuild sequence must live outside
+# it entirely.
+electron-build/

@@ -1,0 +1,830 @@
+/*
+  Eclipse Project Hub - Design-System (UIUXPolish1)
+
+  Erweitert die bestehende, bereits abgestimmte dunkle Anthrazit-/Lila-
+  Palette (unveraendert als Farbwerte uebernommen) um ein vollstaendiges,
+  wiederverwendbares visuelles System: Abstaende, Radien, Schatten,
+  Uebergaenge, Typografie sowie Basis-Klassen fuer Karten, Chips, Buttons
+  und Formularfelder. Reines CSS, keine neue UI-Bibliothek.
+*/
+
+:root {
+  /* Farben - unveraendert aus RC1-RC4 uebernommen */
+  --color-bg: #0b0d12;
+  --color-surface: #12151b;
+  --color-surface-raised: #181c24;
+  --color-surface-hover: #1d222c;
+  --color-border: #272d38;
+  --color-border-strong: #343c4a;
+  --color-text: #f2f4f7;
+  --color-text-muted: #949ead;
+  --color-text-faint: #6b7382;
+  /* Muss >= 4.5:1 Kontrast mit weissem Buttontext behalten (WCAG AA) - beim
+     Anpassen dieses Tons gegenpruefen. */
+  --color-accent: #7958f5;
+  --color-accent-hover: #7452e8;
+  --color-accent-active: #6a4be0;
+  --color-accent-muted: #2a2447;
+  --color-success: #4caf7d;
+  --color-success-muted: rgba(76, 175, 125, 0.14);
+  --color-warning: #d9a441;
+  --color-warning-muted: rgba(217, 164, 65, 0.14);
+  --color-danger: #d9534f;
+  --color-danger-muted: rgba(217, 83, 79, 0.14);
+
+  /* Statusfarben je Projektstatus - unveraendert */
+  --status-planning: #8c7ae6;
+  --status-active: #4a7fd6;
+  --status-waiting: #d9a441;
+  --status-testing: #3fb6c9;
+  --status-paused: #8a8f99;
+  --status-completed: #3c9c6a;
+  --status-error: #d9534f;
+
+  /* Typografie: gut lesbare Systemschrift fuer die Oberflaeche, Monospace
+     ausschliesslich fuer Markdown-Rohtext, generierte Prompts, Slugs und
+     sonstige technische Werte (siehe .font-mono unten). Keine externen
+     Web-Fonts - ausschliesslich lokal ohnehin vorhandene Systemschriften. */
+  --font-family: 'Segoe UI', Inter, system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+  --font-family-mono: 'Cascadia Code', 'Consolas', 'SFMono-Regular', Menlo, monospace;
+
+  --font-size-xs: 11px;
+  --font-size-sm: 12.5px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 20px;
+  --font-size-xxl: 24px;
+
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+
+  /* Abstandsraster (4px-Basis) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.45);
+
+  --transition-fast: 120ms ease;
+  --transition-normal: 180ms ease;
+
+  --sidebar-width: 288px;
+
+  --focus-ring-color: rgba(121, 88, 245, 0.45);
+  --focus-ring: 0 0 0 3px var(--focus-ring-color);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-weight: 600;
+  line-height: var(--line-height-tight);
+  margin: 0 0 var(--space-2) 0;
+}
+
+h2 {
+  font-size: var(--font-size-xxl);
+}
+
+h3 {
+  font-size: var(--font-size-xl);
+}
+
+h4 {
+  font-size: var(--font-size-lg);
+}
+
+p {
+  color: var(--color-text-muted);
+  line-height: var(--line-height-normal);
+}
+
+::selection {
+  background: var(--color-accent-muted);
+}
+
+/* Ruhiger, dezenter Scrollbalken statt der grellen Standarddarstellung. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-faint);
+}
+
+.font-mono {
+  font-family: var(--font-family-mono);
+}
+
+/* ---------------------------------------------------------------------
+   Fokuszustaende - eigener, gut sichtbarer lila Fokusring statt der
+   orangefarbenen Standard-Browserumrandung. Nur bei Tastaturfokus
+   (:focus-visible), nicht bei jedem Mausklick.
+--------------------------------------------------------------------- */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--radius-sm);
+}
+
+/* ---------------------------------------------------------------------
+   Buttons
+--------------------------------------------------------------------- */
+button {
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  /* Native Buttons erben Vordergrundfarbe NICHT automatisch (Browser-
+     Vorgabe) - kann je nach OS-Theme dunklen Text auf dunklem Grund
+     ergeben, z. B. in interaktiven Karten. Explizites `inherit` erzwingt
+     die Eclipse-Textfarbe des umgebenden Kontexts. */
+  color: inherit;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: 36px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast),
+    opacity var(--transition-fast);
+}
+
+.btn-sm {
+  height: 28px;
+  padding: 0 var(--space-3);
+  font-size: var(--font-size-xs);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+.btn-primary:active:not(:disabled) {
+  background: var(--color-accent-active);
+  border-color: var(--color-accent-active);
+}
+
+.btn-secondary {
+  background: var(--color-surface-raised);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--color-surface-hover);
+  border-color: var(--color-border-strong);
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--color-text-muted);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.btn-danger {
+  background: transparent;
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: var(--color-danger-muted);
+}
+
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border-color: transparent;
+  color: var(--color-text-muted);
+}
+
+.btn-icon:hover:not(:disabled) {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+}
+
+/* Entfernt den grellen Standard-Hover-Filter aus RC4 zugunsten gezielter
+   Varianten-Hoverzustaende oben. */
+button:hover {
+  filter: none;
+}
+
+/* ---------------------------------------------------------------------
+   Formulare
+--------------------------------------------------------------------- */
+.field {
+  display: block;
+  margin-bottom: var(--space-4);
+}
+
+.field-label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.field-required::after {
+  content: ' *';
+  color: var(--color-accent);
+}
+
+.field-hint {
+  margin-top: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.field-row {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.field-row > .field {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  width: 100%;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+/* Placeholder sind bedeutsamer Hinweistext (oft die einzige Anleitung in
+   einem leeren Feld), kein rein dekoratives Detail - deshalb muted statt
+   faint, um lesbaren Kontrast zu behalten. */
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+input:hover:not(:disabled),
+textarea:hover:not(:disabled),
+select:hover:not(:disabled) {
+  border-color: var(--color-border-strong);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--color-accent);
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled {
+  color: var(--color-text-faint);
+  background: var(--color-surface);
+  cursor: not-allowed;
+  border-color: var(--color-border);
+}
+
+textarea {
+  min-height: 80px;
+  line-height: var(--line-height-normal);
+  /* Ohne explizites `resize` erlaubt der Browser horizontale
+     Groessenaenderung, die Spalten-Layouts sprengen kann. */
+  resize: vertical;
+}
+
+/* Checkboxen/Radios duerfen NICHT die generische dunkle Eingabeflaechen-
+   Gestaltung (Padding, Hintergrund, Breite 100%) von oben erben - das
+   wuerde aus einer nativen Checkbox eine leere dunkle Flaeche machen.
+   Erste tatsaechliche Verwendung: Import-Tab (Meilenstein 2), Abschnitt 26
+   der Vorgabe verlangt "Checkboxen mit eindeutigem Label". */
+input[type='checkbox'],
+input[type='radio'] {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  flex-shrink: 0;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+input[type='checkbox']:disabled,
+input[type='radio']:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+textarea.textarea-code {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+}
+
+select {
+  cursor: pointer;
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+}
+
+/* ---------------------------------------------------------------------
+   Karten / Flaechen
+--------------------------------------------------------------------- */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+.card-raised {
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-sm);
+}
+
+.card-interactive {
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.card-interactive:hover {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-hover);
+}
+
+.card-active {
+  border-color: var(--color-accent);
+  background: var(--color-accent-muted);
+}
+
+/* ---------------------------------------------------------------------
+   Chips / Badges
+--------------------------------------------------------------------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  line-height: 1.7;
+  white-space: nowrap;
+}
+
+.chip-outline {
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.chip-success {
+  color: var(--color-success);
+  border: 1px solid var(--color-success);
+  background: var(--color-success-muted);
+}
+
+.chip-warning {
+  color: var(--color-warning);
+  border: 1px solid var(--color-warning);
+  background: var(--color-warning-muted);
+}
+
+/* ---------------------------------------------------------------------
+   Banner / Hinweise
+--------------------------------------------------------------------- */
+.banner {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  border: 1px solid var(--color-border);
+}
+
+.banner-info {
+  background: var(--color-accent-muted);
+  border-color: var(--color-accent);
+}
+
+.banner-warning {
+  background: var(--color-warning-muted);
+  border-color: var(--color-warning);
+  color: var(--color-warning);
+}
+
+.banner-danger {
+  background: var(--color-danger-muted);
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+/* ---------------------------------------------------------------------
+   Empty States
+--------------------------------------------------------------------- */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-6);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.empty-state-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--color-accent-muted);
+  color: var(--color-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  margin-bottom: var(--space-1);
+}
+
+.empty-state-title {
+  font-weight: 600;
+  font-size: var(--font-size-md);
+}
+
+.empty-state-text {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  max-width: 52ch;
+}
+
+/* ---------------------------------------------------------------------
+   Layout-Hilfsklassen
+--------------------------------------------------------------------- */
+.app-shell {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.scroll-area {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+}
+
+.wrap {
+  flex-wrap: wrap;
+}
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+.text-faint {
+  color: var(--color-text-faint);
+}
+
+.text-sm {
+  font-size: var(--font-size-sm);
+}
+
+.text-xs {
+  font-size: var(--font-size-xs);
+}
+
+/* Opt-in Ueberlauf-Schutz fuer lange, nicht trennbare Werte (SHA-256-
+   Hashes, Windows-Pfade, ZIP-Dateinamen) - rein additiv, wirkt nur dort,
+   wo die Klasse explizit gesetzt wird (aktuell: Import-Tab-Vorschau-
+   karten), veraendert also keine anderen Tabs. */
+.text-break {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* ---------------------------------------------------------------------
+   Responsive Desktop-Layouts (Abschnitt 14) - die App bleibt eine
+   Desktop-App, funktioniert aber auch bei schmaleren Fenstern (~900px)
+   ohne abgeschnittene Buttons oder unnoetige horizontale Scrollbalken.
+--------------------------------------------------------------------- */
+.two-column {
+  display: flex;
+  gap: var(--space-6);
+  align-items: flex-start;
+}
+
+.two-column > * {
+  min-width: 0;
+}
+
+@media (max-width: 960px) {
+  :root {
+    --sidebar-width: 240px;
+  }
+
+  .two-column {
+    flex-direction: column;
+  }
+
+  .field-row {
+    flex-direction: column;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   Meilenstein 4.4B - Fokussierte Eclipse-UI-Politur
+
+   Kein Redesign: bestehende dunkle Eclipse-Identitaet, Lila-Akzent,
+   Navigationsstruktur, Funktionalitaet und Work-Layout-Konzept bleiben
+   erhalten. Diese Klassen sind bewusst SCOPED (project-tabs.../work-...)
+   statt bestehende globale Klassen (.two-column, .btn-sm usw.) fuer alle
+   Verbraucher zu aendern.
+--------------------------------------------------------------------- */
+
+.project-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  gap: 2px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-bottom: 1px solid var(--color-border);
+  /* Kein permanenter dominanter Scrollbalken - nur ein schmaler, dezenter
+     Balken, sichtbar wenn tatsaechlich ueberlaufen wird. Firefox-Fallback
+     (scrollbar-color) haelt sich an dieselbe Eclipse-Farbgebung wie die
+     ::-webkit-scrollbar-Regeln unten. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-strong) transparent;
+}
+
+.project-tabs::-webkit-scrollbar {
+  height: 6px;
+}
+
+.project-tabs::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.project-tabs::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: var(--radius-pill);
+}
+
+.project-tabs::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-faint);
+}
+
+.project-tab {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+  border-radius: 0;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.project-tab:hover:not(:disabled) {
+  color: var(--color-text);
+}
+
+/* The shared focus-visible rule uses an outward box-shadow, which the
+   horizontally scrollable tab strip can clip. An inset ring stays fully
+   within the tab's own bounds instead. */
+.project-tab:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--focus-ring-color);
+  border-radius: var(--radius-sm);
+}
+
+.project-tab[aria-selected='true'] {
+  color: var(--color-text);
+  font-weight: 600;
+  border-bottom-color: var(--color-accent);
+}
+
+/* Eigene Klasse statt .two-column, damit die Work-spezifische
+   Spaltenbreite andere .two-column-Verbraucher nicht beeinflusst. */
+.work-layout {
+  display: flex;
+  gap: var(--space-6);
+  align-items: flex-start;
+}
+
+.work-list-pane {
+  flex: 1 1 340px;
+  max-width: 380px;
+  min-width: 280px;
+}
+
+.work-detail-pane {
+  flex: 2 1 0%;
+  min-width: 0;
+}
+
+/* Manual smoke test at the Electron minimum window width (~960px) showed
+   the two-column layout still active at 860px, cramming the detail pane
+   and wrapping long titles across many lines - raised so the minimum
+   window width reliably stacks instead. */
+@media (max-width: 1100px) {
+  .work-layout {
+    flex-direction: column;
+  }
+
+  .work-list-pane {
+    max-width: none;
+    width: 100%;
+  }
+
+  .work-detail-pane {
+    width: 100%;
+  }
+}
+
+.work-list-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+/* Eigene Klasse statt der globalen h3, damit die Groesse hier klar
+   untergeordnet zur Projektueberschrift (h2) bleibt, ohne h3 fuer andere
+   Verbraucher zu aendern. */
+.work-detail-title {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.35;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.decision-option {
+  white-space: normal;
+  /* white-space: normal allows wrapping at spaces, but a single unbroken
+     run of up to 200 characters (no spaces) has no break opportunity and
+     can still overflow the button/pane without this. */
+  overflow-wrap: anywhere;
+  height: auto;
+  min-height: 36px;
+  max-width: 100%;
+  text-align: left;
+  /* .btn is a flex container (justify-content: center) - without this
+     override, a multi-line label stretched by .stack would center
+     horizontally instead of left-aligning. */
+  justify-content: flex-start;
+  line-height: 1.4;
+  padding: 8px 14px;
+}
+
+/* Generischer disabled-Zustand bleibt merklich, aber lesbar gedaempft. Die
+   tatsaechlich persistierte gewaehlte Option (.decision-option-resolved-
+   choice, siehe WorkTab.tsx) bleibt davon ausgenommen und darf trotz
+   disabled-Interaktion nicht verblassen - sie ist die wichtigste
+   Information im Bereich. */
+.decision-option:disabled {
+  opacity: 0.75;
+  cursor: default;
+}
+
+.decision-option-resolved-choice:disabled {
+  opacity: 1;
+}
+
+/* Scoped statt Aenderung am globalen input/textarea-Standard. */
+.work-field {
+  padding: 8px 12px;
+}
+
+/* Anliegen-/Plan-Text ist lesbarer Anwendertext, kein Code - normale
+   UI-Schriftart statt Monospace, obwohl das Feld schreibgeschuetzt ist. */
+.work-readonly-text {
+  font-family: var(--font-family);
+  font-size: var(--font-size-md);
+}
+
+.work-timestamp {
+  font-size: var(--font-size-sm);
+}

@@ -1,0 +1,46 @@
+{
+  "name": "project-hub-desktop",
+  "version": "0.1.0-milestone1-rc4",
+  "description": "Local Electron project and context manager",
+  "private": true,
+  "main": "out/main/index.js",
+  "author": "Leon",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22.12.0 <23",
+    "npm": ">=10"
+  },
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "typecheck:node": "tsc --noEmit -p tsconfig.node.json",
+    "typecheck:web": "tsc --noEmit -p tsconfig.web.json",
+    "pretest": "node scripts/prepare-windows-safe-apply-tests.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "verify": "npm run typecheck && npm run test && npm run build",
+    "postinstall": "install-electron && electron-rebuild -f -w better-sqlite3"
+  },
+  "dependencies": {
+    "better-sqlite3": "13.0.2",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "zustand": "4.5.5"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "4.2.0",
+    "@types/better-sqlite3": "7.6.11",
+    "@types/node": "22.20.1",
+    "@types/react": "18.3.12",
+    "@types/react-dom": "18.3.1",
+    "@vitejs/plugin-react": "5.2.0",
+    "electron": "43.7.7",
+    "electron-vite": "5.0.0",
+    "node-addon-api": "8.9.1",
+    "node-gyp": "12.4.0",
+    "typescript": "5.9.3",
+    "vite": "7.3.6",
+    "vitest": "4.1.11"
+  }
+}
